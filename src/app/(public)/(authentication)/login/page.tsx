@@ -1,5 +1,5 @@
-import { LoginForm } from "@/components/login-form";
-import { GalleryVerticalEnd } from "lucide-react";
+import { LoginForm } from "@/components/form/login-form";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -18,9 +18,11 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
+        <Image
           src="/doctor.jpg"
           alt="Image"
+          width={500}
+          height={500}
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>
