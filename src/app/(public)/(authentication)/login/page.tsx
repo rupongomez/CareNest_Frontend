@@ -14,12 +14,21 @@ export default function LoginPage() {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
             <LoginForm />
+            <div className="mt-5 text-center text-gray-500 text-sm">
+              Don't have an account?{" "}
+              <Link
+                href="/register"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
         <Image
-          src="/doctor.jpg"
+          src="/male-doctor.jpg"
           alt="Image"
           width={500}
           height={500}
