@@ -15,6 +15,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useResendOTP, useVerifyAccount } from "@/hooks";
 import { toast } from "../ui/toast";
+import { Spinner } from "../ui/spinner";
 
 const RESEND_COOLDOWN = 5;
 
@@ -185,8 +186,14 @@ export default function VerifyAccountForm() {
         >
           Resend
         </Button>
-        <Button type="submit" form="otp-form">
-          Submit
+        <Button disabled={verifyPending} type="submit" form="otp-form">
+          {verifyPending ? (
+            <>
+              <Spinner /> Verifying...
+            </>
+          ) : (
+            "Verify"
+          )}
         </Button>
       </CardFooter>
     </Card>

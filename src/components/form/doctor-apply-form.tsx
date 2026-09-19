@@ -28,16 +28,14 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+import { DoctorApplicationData } from "@/types/doctor.type";
 import {
   isAcceptedFileSize,
   isAcceptedFileType,
-  MAX_ADDITIONAL_FILES,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
 } from "@/validation";
-import { formatFileSize } from "@/utils";
-import { DoctorApplicationData } from "@/types";
-import { useApplyAsDoctor } from "@/hooks";
 
 //* Data signature
 // {
@@ -59,7 +57,6 @@ import { useApplyAsDoctor } from "@/hooks";
 
 export default function DoctorApplyForm() {
   const router = useRouter();
-  const { mutate: apply, isPending: applyPending } = useApplyAsDoctor();
 
   const form = useForm({
     defaultValues: {
@@ -78,6 +75,7 @@ export default function DoctorApplyForm() {
     },
 
     onSubmit: async ({ value }) => {
+      //   console.log(value);
       const doctorData: DoctorApplicationData = {
         user: {
           name: value.name.trim(),
@@ -96,19 +94,19 @@ export default function DoctorApplyForm() {
           bio: value.bio.trim(),
         },
       };
-
-      apply(
-        {
-          data: doctorData,
-          resume: value.resume as File,
-          additionalFiles: value.additionalFiles,
-        },
-        {
-          onSuccess: (res) => {
-            console.log(res);
-          },
-        },
-      );
+      //   console.log(doctorData);
+      //   apply(
+      //     {
+      //       data: doctorData,
+      //       resume: value.resume as File,
+      //       additionalFiles: value.additionalFiles,
+      //     },
+      //     {
+      //       onSuccess: (res) => {
+      //         console.log(res);
+      //       },
+      //     },
+      //   );
     },
   });
 
@@ -464,18 +462,19 @@ export default function DoctorApplyForm() {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="resume-field">Resume</FieldLabel>
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div>
                     <Button
                       render={<label htmlFor="resume-field" />}
                       nativeButton={false}
                       variant="outline"
                     >
                       <FileUp size="4" />
-                      Upload resume
+                      Upload Resume
                     </Button>
+
                     <input
-                      id="resume-field"
                       type="file"
+                      id="resume-field"
                       className="sr-only"
                       name={field.name}
                       onChange={(e) => {
@@ -483,132 +482,36 @@ export default function DoctorApplyForm() {
 
                         if (
                           selected &&
-                          (!isAcceptedFileSize(selected.size) ||
-                            !isAcceptedFileType(selected.type))
+                          (!isAcceptedFileSize(selected?.size) ||
+                            !isAcceptedFileType(selected?.type))
                         ) {
                           field.handleBlur();
                           return;
                         }
 
+                        console.log(selected);
                         field.handleChange(selected);
                         e.target.value = "";
                       }}
                     />
                     {file ? (
-                      <span className="inline-flex max-w-full items-center gap-2 rounded-lg bg-muted px-2.5 py-1 text-sm">
-                        <FileText className="size-4 shrink-0 text-primary" />
-                        <span className="truncate">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatFileSize(file.size)}
-                        </span>
+                      <div className="inline-flex">
+                        <span>{file.name}</span>
                         <button
+                          onClick={() => field.handleChange(null)}
                           type="button"
-                          aria-label="Remove resume"
-                          onClick={() => {
-                            field.handleChange(null);
-                            field.handleBlur();
-                          }}
-                          className="text-muted-foreground transition-colors hover:text-destructive focus:outline-none"
                         >
-                          <X className="size-4" />
+                          <X />
                         </button>
-                      </span>
+                      </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">
-                        PDF, DOC, DOCX or image up to {MAX_FILE_SIZE} MB
+                      <span>
+                        supported File: .pdf, .doc, .docx, .png, .jpg and and
+                        size {MAX_FILE_SIZE}
+                        MB
                       </span>
                     )}
                   </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          </form.Field>
-
-          <form.Field name="additionalFiles">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              const files = field.state.value;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor="additional-file-field">
-                    Resume
-                  </FieldLabel>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Button
-                      render={<label htmlFor="additional-file-field" />}
-                      nativeButton={false}
-                      variant="outline"
-                    >
-                      <Plus size="4" />
-                      Add Files
-                    </Button>
-                    <input
-                      id="additional-file-field"
-                      type="file"
-                      multiple
-                      className="sr-only"
-                      name={field.name}
-                      onChange={(e) => {
-                        const incoming = Array.from(e.target.files ?? []);
-
-                        if (incoming.length === 0) {
-                          return;
-                        }
-
-                        const invalid = incoming.some(
-                          (file) =>
-                            !isAcceptedFileSize(file.size) ||
-                            !isAcceptedFileType(file.type),
-                        );
-
-                        if (invalid) {
-                          field.handleBlur();
-                          e.target.value = "";
-                          return;
-                        }
-
-                        field.handleChange([...files, ...incoming]);
-                      }}
-                    />
-                    {files.length > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        {files.length} of {MAX_ADDITIONAL_FILES} added
-                      </span>
-                    )}
-                  </div>
-                  {files.length > 0 && (
-                    <ul className="flex flex-col gap-2">
-                      {files.map((file, index) => (
-                        <li
-                          key={`${file.name}-${index}`}
-                          className="flex items-center justify-between gap-2 rounded-lg bg-muted px-3 py-2 text-sm"
-                        >
-                          <span className="flex min-w-0 items-center gap-2">
-                            <FileText className="size-4 shrink-0 text-primary" />
-                            <span className="truncate">{file.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {formatFileSize(file.size)}
-                            </span>
-                          </span>
-                          <button
-                            type="button"
-                            aria-label={`Remove ${file.name}`}
-                            onClick={() => {
-                              field.handleChange(
-                                files.filter((_, i) => i !== index),
-                              );
-                              field.handleBlur();
-                            }}
-                            className="text-muted-foreground transition-colors hover:text-destructive focus:outline-none"
-                          >
-                            <X className="size-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
