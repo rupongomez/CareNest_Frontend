@@ -36,6 +36,7 @@ import {
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
 } from "@/validation";
+import { formateFileSize } from "@/utils";
 
 //* Data signature
 // {
@@ -75,7 +76,7 @@ export default function DoctorApplyForm() {
     },
 
     onSubmit: async ({ value }) => {
-      //   console.log(value);
+      console.log(value);
       const doctorData: DoctorApplicationData = {
         user: {
           name: value.name.trim(),
@@ -94,7 +95,7 @@ export default function DoctorApplyForm() {
           bio: value.bio.trim(),
         },
       };
-      //   console.log(doctorData);
+      // console.log(doctorData);
       //   apply(
       //     {
       //       data: doctorData,
@@ -495,15 +496,19 @@ export default function DoctorApplyForm() {
                       }}
                     />
                     {file ? (
-                      <div className="inline-flex">
-                        <span>{file.name}</span>
+                      <span className="inline-flex max-w-full items-center gap-2 rounded-lg bg-muted px-2.5 py-1 text-sm ">
+                        <FileText className="size-4 shrink-0 text-primary" />
+                        <span className="truncate">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formateFileSize(file.size)}
+                        </span>
                         <button
                           onClick={() => field.handleChange(null)}
                           type="button"
                         >
                           <X />
                         </button>
-                      </div>
+                      </span>
                     ) : (
                       <span>
                         supported File: .pdf, .doc, .docx, .png, .jpg and and
@@ -511,6 +516,81 @@ export default function DoctorApplyForm() {
                         MB
                       </span>
                     )}
+                  </div>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </Field>
+              );
+            }}
+          </form.Field>
+
+          <form.Field name="additionalFiles">
+            {(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              const files = field.state.value;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor="additional-file-field">
+                    Additional files{" "}
+                  </FieldLabel>
+                  <div>
+                    <Button
+                      render={<label htmlFor="additional-file-field" />}
+                      nativeButton={false}
+                      variant="outline"
+                    >
+                      <FileUp size="4" />
+                      Upload Additional FIles
+                    </Button>
+
+                    <input
+                      id="additional-file-field"
+                      type="file"
+                      multiple
+                      className="sr-only"
+                      name={field.name}
+                      onChange={(e) => {
+                        const incoming = Array.from(e.target.files ?? []);
+                        field.handleChange([...files, ...incoming]);
+
+                        if (incoming.length === 0) {
+                          return;
+                        }
+
+                        const invalid = incoming.some(
+                          (file) =>
+                            !isAcceptedFileSize(file.size) ||
+                            !isAcceptedFileType(file.type),
+                        );
+
+                        if (invalid) {
+                          field.handleBlur();
+                          e.target.value = "";
+                          return;
+                        }
+                      }}
+                    />
+                    {/* {file ? (
+                      <span className="inline-flex max-w-full items-center gap-2 rounded-lg bg-muted px-2.5 py-1 text-sm ">
+                        <FileText className="size-4 shrink-0 text-primary" />
+                        <span className="truncate">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formateFileSize(file.size)}
+                        </span>
+                        <button
+                          onClick={() => field.handleChange(null)}
+                          type="button"
+                        >
+                          <X />
+                        </button>
+                      </span>
+                    ) : (
+                      <span>
+                        supported File: .pdf, .doc, .docx, .png, .jpg and and
+                        size {MAX_FILE_SIZE}
+                        MB
+                      </span>
+                    )} */}
                   </div>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
