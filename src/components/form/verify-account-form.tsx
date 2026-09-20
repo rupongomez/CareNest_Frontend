@@ -13,23 +13,34 @@ import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { useResendOTP, useVerifyAccount } from "@/hooks";
+import {
+  useResendOTP,
+  useVerifyAccount,
+  useVerifyDoctorAccount,
+} from "@/hooks";
 import { toast } from "../ui/toast";
 import { Spinner } from "../ui/spinner";
 
 const RESEND_COOLDOWN = 5;
 
-export default function VerifyAccountForm() {
+export default function VerifyAccountForm({
+  mode = "patient",
+}: {
+  mode: "doctor" | "patient";
+}) {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const router = useRouter();
   const [otp, setOtp] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
   const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
 
-  const { mutate: verify, isPending: verifyPending } = useVerifyAccount();
+  const { mutate: verifyPatient, isPending: verifyPending } =
+    useVerifyAccount();
+  const { mutate: verifyDoctor } = useVerifyDoctorAccount();
   const { mutate: resend, isPending: resendPending } = useResendOTP();
 
-  const router = useRouter();
+  const verify = mode === "doctor" ? verifyDoctor : verifyPatient;
 
   useEffect(() => {
     if (!email) {
@@ -67,14 +78,22 @@ export default function VerifyAccountForm() {
             type: "error",
           });
         }
+        if (mode === "patient") {
+          toast.add({
+            title: "Verification Successful",
+            description:
+              "An admin will approve your account. This may take upto 3 business days. Please be patient and keep an eye on your email for further instructions.",
+            type: "success",
+          });
+          router.push("/");
+        }
+
         toast.add({
           title: "Verification Successful",
           description:
             "Your account has been verified successfully. You can now log in.",
           type: "success",
         });
-
-        router.push("/");
       },
       onError: (err) => {
         toast.add({

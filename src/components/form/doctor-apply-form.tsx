@@ -31,12 +31,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { DoctorApplicationData } from "@/types/doctor.type";
 import {
+  doctorApplicationSchema,
   isAcceptedFileSize,
   isAcceptedFileType,
+  MAX_ADDITIONAL_FILES,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
 } from "@/validation";
 import { formateFileSize } from "@/utils";
+import { useApplyAsDoctor } from "@/hooks";
+import { toast } from "../ui/toast";
+import { Spinner } from "../ui/spinner";
+import { validators } from "cn/config";
 
 //* Data signature
 // {
@@ -58,15 +64,16 @@ import { formateFileSize } from "@/utils";
 
 export default function DoctorApplyForm() {
   const router = useRouter();
+  const { mutate: apply, isPending: applyPending } = useApplyAsDoctor();
 
   const form = useForm({
     defaultValues: {
-      name: "Mir Hussain",
-      email: "drmir@gmail.com",
-      phone: "01912345678",
+      name: "Rupon Gomez",
+      email: "rupongomez@gmail.com",
+      phone: "01912345675",
       address: "Neptune",
       specialization: "Cardiologist",
-      licenseNumber: "ABC123",
+      licenseNumber: "ABC1234",
       qualifications: "MBBS",
       experienceYears: "50",
       consultationFee: "10000",
@@ -74,9 +81,10 @@ export default function DoctorApplyForm() {
       resume: null as File | null,
       additionalFiles: [] as File[],
     },
-
+    validators: {
+      onSubmit: doctorApplicationSchema,
+    },
     onSubmit: async ({ value }) => {
-      console.log(value);
       const doctorData: DoctorApplicationData = {
         user: {
           name: value.name.trim(),
@@ -95,19 +103,43 @@ export default function DoctorApplyForm() {
           bio: value.bio.trim(),
         },
       };
-      // console.log(doctorData);
-      //   apply(
-      //     {
-      //       data: doctorData,
-      //       resume: value.resume as File,
-      //       additionalFiles: value.additionalFiles,
-      //     },
-      //     {
-      //       onSuccess: (res) => {
-      //         console.log(res);
-      //       },
-      //     },
-      //   );
+
+      apply(
+        {
+          data: doctorData,
+          resume: value.resume as File,
+          additionalFiles: value.additionalFiles,
+        },
+        {
+          onSuccess: (res) => {
+            if (!res.success) {
+              toast.add({
+                title: "Server Failure",
+                description: "Something went wrong. Please try again later.",
+                type: "error",
+              });
+            }
+            toast.add({
+              title: "Doctor Application Submitted Successfully",
+              description:
+                "Please verify your email to complete the registration process.",
+              type: "success",
+            });
+            const params = new URLSearchParams({
+              email: doctorData.user.email,
+            });
+            router.push(`/apply/verify-account?${params.toString()}`);
+          },
+          onError: (err) => {
+            toast.add({
+              title: "Doctor Application Failed",
+              description:
+                err.message || "Please check your information and try again.",
+              type: "error",
+            });
+          },
+        },
+      );
     },
   });
 
@@ -481,16 +513,6 @@ export default function DoctorApplyForm() {
                       onChange={(e) => {
                         const selected = e.target.files?.[0] ?? null;
 
-                        if (
-                          selected &&
-                          (!isAcceptedFileSize(selected?.size) ||
-                            !isAcceptedFileType(selected?.type))
-                        ) {
-                          field.handleBlur();
-                          return;
-                        }
-
-                        console.log(selected);
                         field.handleChange(selected);
                         e.target.value = "";
                       }}
@@ -557,40 +579,58 @@ export default function DoctorApplyForm() {
                           return;
                         }
 
-                        const invalid = incoming.some(
-                          (file) =>
-                            !isAcceptedFileSize(file.size) ||
-                            !isAcceptedFileType(file.type),
-                        );
+                        // const invalid = incoming.some(
+                        //   (file) =>
+                        //     !isAcceptedFileSize(file.size) ||
+                        //     !isAcceptedFileType(file.type),
+                        // );
 
-                        if (invalid) {
-                          field.handleBlur();
-                          e.target.value = "";
-                          return;
-                        }
+                        // if (invalid) {
+                        //   field.handleBlur();
+                        //   e.target.value = "";
+                        //   return;
+                        // }
+
+                        field.handleChange([...files, ...incoming]);
+                        e.target.value = "";
                       }}
                     />
-                    {/* {file ? (
-                      <span className="inline-flex max-w-full items-center gap-2 rounded-lg bg-muted px-2.5 py-1 text-sm ">
-                        <FileText className="size-4 shrink-0 text-primary" />
-                        <span className="truncate">{file.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formateFileSize(file.size)}
-                        </span>
-                        <button
-                          onClick={() => field.handleChange(null)}
-                          type="button"
-                        >
-                          <X />
-                        </button>
+                    {files.length > 0 && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {files.length} of {MAX_ADDITIONAL_FILES} files Added
                       </span>
-                    ) : (
-                      <span>
-                        supported File: .pdf, .doc, .docx, .png, .jpg and and
-                        size {MAX_FILE_SIZE}
-                        MB
-                      </span>
-                    )} */}
+                    )}
+                    {files.length > 0 && (
+                      <ul className="flex flex-col gap-2">
+                        {files.map((file, index) => (
+                          <li
+                            key={`${file.name}-${index}`}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-muted px-3 py-2 text-sm"
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <FileText className="size-4 shrink-0 text-primary" />
+                              <span className="truncate">{file.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formateFileSize(file.size)}
+                              </span>
+                            </span>
+                            <button
+                              type="button"
+                              aria-label={`Remove ${file.name}`}
+                              onClick={() => {
+                                field.handleChange(
+                                  files.filter((_, i) => i !== index),
+                                );
+                                field.handleBlur();
+                              }}
+                              className="text-muted-foreground transition-colors hover:text-destructive "
+                            >
+                              <X />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -600,7 +640,14 @@ export default function DoctorApplyForm() {
         </FieldGroup>
         <div className="flex justify-end w-full mt-5">
           <Button type="submit" size="lg">
-            Submit
+            {applyPending ? (
+              <>
+                <Spinner />
+                Submitting...
+              </>
+            ) : (
+              "Submit Application"
+            )}
           </Button>
         </div>
       </form>
