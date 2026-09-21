@@ -2,7 +2,7 @@ const prefix = "/patient";
 
 export const patientRoutes = [
   {
-    title: "management System ",
+    title: "Booking ",
     url: "#",
     items: [
       {

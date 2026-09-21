@@ -2,7 +2,7 @@ const prefix = "/doctor";
 
 export const doctorRoutes = [
   {
-    title: "Schedule Management",
+    title: "Schedule ",
     url: "#",
     items: [
       {

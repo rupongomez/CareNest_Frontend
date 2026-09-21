@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { UserRole } from "@/types";
 import { adminRoutes, doctorRoutes, patientRoutes } from "@/routes";
-import { SidebarItem, SidebarItems } from "@/types/sidebar.type";
+import { SidebarItems } from "@/types/sidebar.type";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -30,7 +30,11 @@ export function DashboardSidebar({ role }: { role: UserRole }) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <h2>CareNest</h2>
+        <Link href="/">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Care<span className="text-green-500">Nest</span>
+          </h2>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         {routes.map((item) => (
