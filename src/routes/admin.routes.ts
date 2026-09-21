@@ -2,7 +2,7 @@ const prefix = "/admin";
 
 export const adminRoutes = [
   {
-    title: "management System ",
+    title: "management ",
     url: "#",
     items: [
       {
@@ -26,7 +26,6 @@ export const adminRoutes = [
       {
         title: "Data Fetching",
         url: "#",
-        isActive: true,
       },
     ],
   },

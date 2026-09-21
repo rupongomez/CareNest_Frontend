@@ -5,7 +5,7 @@ import React, { ReactNode } from "react";
 export default function layout({ children }: { children: ReactNode }) {
   return (
     <RoleGuard roles={["ADMIN", "SUPER_ADMIN"]}>
-      <DashboardShell role="SUPER_ADMIN">{children}</DashboardShell>
+      <DashboardShell role="ADMIN">{children}</DashboardShell>
     </RoleGuard>
   );
 }

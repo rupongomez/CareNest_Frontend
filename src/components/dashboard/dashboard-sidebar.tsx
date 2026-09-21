@@ -1,5 +1,4 @@
-import * as React from "react";
-
+"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -12,60 +11,40 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { UserRole } from "@/types";
+import { adminRoutes, doctorRoutes, patientRoutes } from "@/routes";
+import { SidebarItem, SidebarItems } from "@/types/sidebar.type";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-// This is sample data.
-const data = {
-  navMain: [
-    {
-      title: "management System ",
-      url: "#",
-      items: [
-        {
-          title: "Overview",
-          url: "/admin",
-        },
-        {
-          title: "Doctor Approval",
-          url: "/admin/approve-doctor",
-        },
-      ],
-    },
-    {
-      title: "App Settings",
-      url: "#",
-      items: [
-        {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
-          isActive: true,
-        },
-      ],
-    },
-  ],
+const sidebarRoutes: Partial<Record<UserRole, SidebarItems>> = {
+  SUPER_ADMIN: adminRoutes,
+  ADMIN: adminRoutes,
+  DOCTOR: doctorRoutes,
+  PATIENT: patientRoutes,
 };
 
-export function DashboardSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+export function DashboardSidebar({ role }: { role: UserRole }) {
+  const pathname = usePathname();
+  const routes: SidebarItems = sidebarRoutes[role] || [];
   return (
-    <Sidebar {...props}>
+    <Sidebar>
       <SidebarHeader>
         <h2>CareNest</h2>
       </SidebarHeader>
       <SidebarContent>
-        {data.navMain.map((item) => (
+        {routes.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                    <SidebarMenuButton
+                      render={<Link href={item.url} />}
+                      isActive={pathname === item.url}
+                    >
+                      {item.title}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
