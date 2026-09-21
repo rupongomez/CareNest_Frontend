@@ -136,7 +136,7 @@ export function LoginForm() {
             {loginPending ? (
               <>
                 <Spinner />
-                "Logging in..."{" "}
+                Logging in...{" "}
               </>
             ) : (
               "Login"
