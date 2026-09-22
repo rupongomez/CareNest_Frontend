@@ -78,7 +78,7 @@ export default function VerifyAccountForm({
             type: "error",
           });
         }
-        if (mode === "patient") {
+        if (mode === "doctor") {
           toast.add({
             title: "Verification Successful",
             description:
@@ -94,6 +94,7 @@ export default function VerifyAccountForm({
             "Your account has been verified successfully. You can now log in.",
           type: "success",
         });
+        router.push("/");
       },
       onError: (err) => {
         toast.add({
