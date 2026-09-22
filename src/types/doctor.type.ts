@@ -1,5 +1,7 @@
 import { User } from "./user.type";
 
+export type DoctorVerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface DoctorApplicationData {
   user: {
     name: string;
@@ -35,7 +37,7 @@ export interface Doctor {
   bio?: string;
   consultationFee?: string;
   contactNumber?: string;
-  verificationStatus: string;
+  verificationStatus: DoctorVerificationStatus;
   rejectionReason?: string;
   reviewedBy?: string;
   reviewedAt?: string;
@@ -53,4 +55,18 @@ export interface Doctor {
 export interface AdditionalFile {
   url: string;
   publicId: string;
+}
+
+export interface DoctorParams {
+  verificationStatus?: DoctorVerificationStatus;
+  page?: number;
+  limit?: number;
+  SearchTerm?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface ApproveDoctorPayload {
+  doctorId: string;
+  verificationStatus: "APPROVED" | "REJECTED";
+  rejectionReason?: string;
 }

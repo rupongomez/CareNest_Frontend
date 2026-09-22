@@ -6,12 +6,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React from "react";
 import DoctorReviewSheet from "./doctor-review-sheet";
 import { useSuspenseGetAllDoctors } from "@/hooks";
+import { DoctorParams, DoctorVerificationStatus } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Dispatch, SetStateAction } from "react";
 
-export default function DoctorApprovalTable() {
-  const { data } = useSuspenseGetAllDoctors();
+interface Props extends DoctorParams {
+  handleReview: Dispatch<SetStateAction<string>>;
+}
+
+export default function DoctorApprovalTable({
+  handleReview,
+  ...params
+}: Props) {
+  const { data } = useSuspenseGetAllDoctors(params);
   const doctors = data?.data;
 
   return (
@@ -38,7 +47,12 @@ export default function DoctorApprovalTable() {
               </TableCell>
               <TableCell>{doctor.specialization}</TableCell>
               <TableCell className="text-right">
-                <DoctorReviewSheet />
+                <Button
+                  variant="outline"
+                  onClick={() => handleReview(doctor.id)}
+                >
+                  Review
+                </Button>
               </TableCell>
             </TableRow>
           ))}
