@@ -131,10 +131,16 @@ export default function DoctorApplyForm() {
             router.push(`/apply/verify-account?${params.toString()}`);
           },
           onError: (err) => {
+            const apiError = err as Error & {
+              data?: {
+                message?: string;
+              };
+            };
             toast.add({
               title: "Doctor Application Failed",
               description:
-                err.message || "Please check your information and try again.",
+                apiError?.data?.message ??
+                "Please check your information and try again.",
               type: "error",
             });
           },

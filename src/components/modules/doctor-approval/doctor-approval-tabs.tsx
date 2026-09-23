@@ -6,6 +6,8 @@ import DoctorApprovalTableLoading from "./doctor-approval-table-loading";
 import { DoctorParams, DoctorVerificationStatus } from "@/types";
 import { Input } from "@/components/ui/input";
 import DoctorReviewSheet from "./doctor-review-sheet";
+import useDebounce from "@/hooks/debounce.hook";
+import TablePagination from "@/components/ui/table-pagination";
 
 const verificationStatus: ["ALL" | DoctorVerificationStatus, string][] = [
   ["APPROVED", "Approved"],
@@ -17,17 +19,26 @@ const verificationStatus: ["ALL" | DoctorVerificationStatus, string][] = [
 export default function DoctorApprovalTabs() {
   const [tab, setTab] = useState<"ALL" | DoctorVerificationStatus>("ALL");
   const [selectedId, setSelectedId] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
+  const debouncedSearch = useDebounce(searchInput);
+  console.log({ searchInput, debouncedSearch });
 
   const queryParams: DoctorParams = {
     page: 1,
     limit: 10,
     ...(tab === "ALL" ? {} : { verificationStatus: tab }),
+    ...(debouncedSearch ? { SearchTerm: debouncedSearch } : {}),
   };
   return (
     <>
       <div className="flex justify-between my-5 items-center">
         <div>
-          <Input type="search" placeholder="Search by name or email " />
+          <Input
+            onChange={(e) => setSearchInput(e.target.value)}
+            type="search"
+            placeholder="Search by name or email "
+          />
         </div>
         <Tabs value={tab} onValueChange={(value) => setTab(value)}>
           <TabsList>
@@ -42,6 +53,9 @@ export default function DoctorApprovalTabs() {
       <Suspense fallback={<DoctorApprovalTableLoading />}>
         <DoctorApprovalTable {...queryParams} handleReview={setSelectedId} />
       </Suspense>
+
+      <TablePagination />
+
       <DoctorReviewSheet
         selectedId={selectedId}
         onClose={() => setSelectedId("")}

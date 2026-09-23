@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { Toast, toast } from "@/components/ui/toast";
 import { useApproveDoctor, useGetAllDoctors } from "@/hooks";
@@ -120,8 +121,15 @@ export default function DoctorReviewSheet({
                 variant="default"
                 size="lg"
                 className="flex-1"
+                disabled={isPending}
               >
-                Approve{" "}
+                {isPending ? (
+                  <>
+                    <Spinner className="animate-spin" /> Approving...
+                  </>
+                ) : (
+                  "Approve"
+                )}
               </Button>
             </div>
           )}
