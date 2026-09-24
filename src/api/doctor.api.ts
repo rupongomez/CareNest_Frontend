@@ -42,3 +42,9 @@ export const approveDoctor = (payload: ApproveDoctorPayload) => {
     body: payload,
   });
 };
+
+export const getAllPublicDoctors = (params: DoctorParams) => {
+  return apiClient<ApiResponse<Doctor[]>>("/doctor/public/all-doctors", {
+    params: params,
+  });
+};

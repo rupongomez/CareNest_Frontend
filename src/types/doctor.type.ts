@@ -61,7 +61,7 @@ export interface DoctorParams {
   verificationStatus?: DoctorVerificationStatus;
   page?: number;
   limit?: number;
-  SearchTerm?: string;
+  searchTerm?: string;
   sortOrder?: "asc" | "desc";
 }
 

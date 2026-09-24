@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import TablePagination from "@/components/ui/table-pagination";
-import { useSuspenseGetAllDoctors } from "@/hooks";
+import { useGetAllPublicDoctors } from "@/hooks";
 import type { DoctorParams } from "@/types";
 
 interface Props extends DoctorParams {
@@ -18,12 +18,12 @@ interface Props extends DoctorParams {
   handlePageChange: Dispatch<SetStateAction<number>>;
 }
 
-export default function DoctorApprovalTable({
+export default function ScheduleTable({
   handleReview,
   handlePageChange,
   ...params
 }: Props) {
-  const { data } = useSuspenseGetAllDoctors(params);
+  const { data } = useGetAllPublicDoctors(params);
 
   const doctors = data?.data ?? [];
   const totalPages = data?.meta?.totalPages ?? 0;
@@ -44,7 +44,7 @@ export default function DoctorApprovalTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isEmpty ? (
+            {/* {isEmpty ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={6}>
                   <div className="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
@@ -95,7 +95,7 @@ export default function DoctorApprovalTable({
                   </TableCell>
                 </TableRow>
               ))
-            )}
+            )} */}
           </TableBody>
         </Table>
       </div>

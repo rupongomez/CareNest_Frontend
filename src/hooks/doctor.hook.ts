@@ -2,6 +2,7 @@ import {
   applyAsDoctor,
   approveDoctor,
   getAllDoctors,
+  getAllPublicDoctors,
   verifyDoctorAccount,
 } from "@/api";
 import { DoctorParams } from "@/types";
@@ -27,6 +28,12 @@ export const useGetAllDoctors = (params: DoctorParams) => {
   return useQuery({
     queryKey: ["doctors", params],
     queryFn: () => getAllDoctors(params),
+  });
+};
+export const useGetAllPublicDoctors = (params: DoctorParams) => {
+  return useQuery({
+    queryKey: ["doctors", params],
+    queryFn: () => getAllPublicDoctors(params),
   });
 };
 
