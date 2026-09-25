@@ -8,7 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import React from "react";
-import DoctorReviewSheet from "./doctor-review-sheet";
 import { useSuspenseGetAllDoctors } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 

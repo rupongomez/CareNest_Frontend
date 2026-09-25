@@ -80,12 +80,13 @@ export default function CreateScheduleForm({
                 <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                 <Popover>
                   <PopoverTrigger render={<Button variant="outline" />}>
-                    Select Date
+                    {selected ? `${format(selected, "PPP")}` : "Select Date"}
                   </PopoverTrigger>
-                  <PopoverContent>
+                  <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
                       selected={selected}
+                      disabled={{ before: new Date() }}
                       onSelect={(date) => {
                         if (date) {
                           field.handleChange(format(date, "yyyy-MM-dd"));

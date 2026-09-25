@@ -5,6 +5,7 @@ import {
   Doctor,
   DoctorApplicationPayload,
   DoctorParams,
+  PublicDoctorProfile,
 } from "@/types/doctor.type";
 
 export const applyAsDoctor = (payload: DoctorApplicationPayload) => {
@@ -48,3 +49,9 @@ export const getAllPublicDoctors = (params: DoctorParams) => {
     params: params,
   });
 };
+
+export function getPublicDoctorProfile(doctorId: string) {
+  return apiClient<ApiResponse<PublicDoctorProfile>>(
+    `/doctor/public/${doctorId}`,
+  );
+}

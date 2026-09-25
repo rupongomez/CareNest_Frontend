@@ -12,90 +12,79 @@ import {
 import TablePagination from "@/components/ui/table-pagination";
 import { useGetAllPublicDoctors } from "@/hooks";
 import type { DoctorParams } from "@/types";
+import { getMySchedules } from "@/api/schedule.api";
+import { useMySchedules } from "@/hooks/schedule.hook";
+import { format } from "date-fns";
+import ScheduleActions from "./schedule-actions";
 
 interface Props extends DoctorParams {
-  handleReview: Dispatch<SetStateAction<string>>;
   handlePageChange: Dispatch<SetStateAction<number>>;
 }
 
-export default function ScheduleTable({
-  handleReview,
-  handlePageChange,
-  ...params
-}: Props) {
-  const { data } = useGetAllPublicDoctors(params);
+export default function ScheduleTable({ handlePageChange, ...params }: Props) {
+  const { data } = useMySchedules(params);
 
-  const doctors = data?.data ?? [];
+  const schedules = data?.data ?? [];
   const totalPages = data?.meta?.totalPages ?? 0;
-  const isEmpty = doctors.length === 0;
+
+  if (schedules.length === 0) {
+    return (
+      <div className="rounded-lg border p-10 text-center text-sm text-muted-foreground">
+        No schedules found. Create your first schedule to start accepting
+        appointments.
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg border bg-card">
+      <div className="rounded-lg border w-full table-fixed">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead>Name</TableHead>
-              <TableHead>License No.</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Contact No.</TableHead>
-              <TableHead>Specialization</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="w-1/5 text-center">Date & Time</TableHead>
+              <TableHead className="w-1/6 text-center">Slots</TableHead>
+              <TableHead className="w-1/6 text-center">Status</TableHead>
+              <TableHead className="w-1/3 text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* {isEmpty ? (
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={6}>
-                  <div className="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
-                    <span className="rounded-full bg-muted p-3">
-                      <SearchX className="size-5 text-muted-foreground" />
+            {schedules.map((schedule) => (
+              <TableRow key={schedule.id}>
+                <TableCell className="font-medium text-center">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold">
+                      {format(schedule.startDateTime, "PPP")} to{" "}
                     </span>
-                    <p className="font-medium">No doctors found</p>
-                    <p className="max-w-sm text-sm text-muted-foreground">
-                      {params.searchTerm
-                        ? `No results for "${params.searchTerm}". Try a different name or email.`
-                        : "There are no doctors in this view yet."}
-                    </p>
+                    <span className="text-muted-foreground">
+                      {format(schedule.endDateTime, "PPP")}
+                    </span>
                   </div>
                 </TableCell>
+                <TableCell className="font-mono text-xs text-center">
+                  {schedule.totalSlots - schedule.availableSlots}/
+                  {schedule.totalSlots} booked
+                </TableCell>
+                <TableCell
+                  className="max-w-55 truncate text-muted-foreground text-center"
+                  title={schedule.status}
+                >
+                  {schedule.status === "PUBLISHED" ? (
+                    <span className="text-primary font-semibold">
+                      {schedule.status}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {schedule.status}
+                    </span>
+                  )}
+                </TableCell>
+
+                <TableCell className="text-right">
+                  <ScheduleActions schedule={schedule} />
+                </TableCell>
               </TableRow>
-            ) : (
-              doctors.map((doctor) => (
-                <TableRow key={doctor.id}>
-                  <TableCell className="font-medium">{doctor.name}</TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {doctor.licenseNumber}
-                  </TableCell>
-                  <TableCell
-                    className="max-w-[220px] truncate text-muted-foreground"
-                    title={doctor.email}
-                  >
-                    {doctor.email}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {doctor.contactNumber ? doctor.contactNumber : "-"}
-                  </TableCell>
-                  <TableCell>{doctor.specialization}</TableCell>
-                  <TableCell className="text-right">
-                    {doctor.user.emailVerified ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleReview(doctor.id)}
-                        disabled={doctor.verificationStatus !== "PENDING"}
-                      >
-                        Review
-                      </Button>
-                    ) : (
-                      <Button disabled variant="outline" size="sm">
-                        Not Verified
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )} */}
+            ))}
           </TableBody>
         </Table>
       </div>

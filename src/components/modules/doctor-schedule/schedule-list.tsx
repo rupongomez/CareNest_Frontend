@@ -15,13 +15,14 @@ const statuses: ["ALL" | ScheduleStatus, string][] = [
 
 export default function ScheduleList() {
   const [tab, setTab] = useState<"ALL" | ScheduleStatus>("ALL");
-
+  const [page, setPage] = useState(1);
   const queryParams: ScheduleParams = {
     page: 1,
     limit: 10,
     // sortBy: "startDateTime",
     sortOrder: "asc",
     ...(tab === "ALL" ? {} : { status: tab }),
+    sortBy: "startDateTime",
   };
 
   return (
@@ -40,7 +41,7 @@ export default function ScheduleList() {
       </div>
 
       <Suspense fallback={<ScheduleListLoading />}>
-        <ScheduleTable {...queryParams} />
+        <ScheduleTable {...queryParams} handlePageChange={setPage} />
       </Suspense>
     </>
   );

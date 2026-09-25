@@ -3,9 +3,11 @@ import {
   approveDoctor,
   getAllDoctors,
   getAllPublicDoctors,
+  getPublicDoctorProfile,
   verifyDoctorAccount,
 } from "@/api";
-import { DoctorParams } from "@/types";
+import { getTodayScheduleByDoctor } from "@/api/schedule.api";
+import { DoctorParams, PublicDoctorParams } from "@/types";
 import {
   useMutation,
   useQuery,
@@ -13,43 +15,72 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 
-export const useApplyAsDoctor = () => {
+export function useApplyAsDoctor() {
   return useMutation({
     mutationFn: applyAsDoctor,
   });
-};
-export const useVerifyDoctorAccount = () => {
+}
+
+export function useVerifyDoctorAccount() {
   return useMutation({
     mutationFn: verifyDoctorAccount,
   });
-};
+}
 
-export const useGetAllDoctors = (params: DoctorParams) => {
+export function useGetAllDoctors(params: DoctorParams) {
   return useQuery({
     queryKey: ["doctors", params],
     queryFn: () => getAllDoctors(params),
   });
-};
-export const useGetAllPublicDoctors = (params: DoctorParams) => {
+}
+
+export function useGetAllPublicDoctors(params: PublicDoctorParams) {
   return useQuery({
-    queryKey: ["doctors", params],
+    queryKey: ["doctor", "public", params],
     queryFn: () => getAllPublicDoctors(params),
   });
-};
+}
 
-export const useSuspenseGetAllDoctors = (params: DoctorParams) => {
+export function useSuspenseGetPublicDoctors(params: PublicDoctorParams) {
+  return useSuspenseQuery({
+    queryKey: ["doctors", "public", params],
+    queryFn: () => getAllPublicDoctors(params),
+  });
+}
+
+export function usePublicDoctorProfile(doctorId: string) {
+  return useQuery({
+    queryKey: ["doctor", "public", doctorId],
+    queryFn: () => getPublicDoctorProfile(doctorId),
+    enabled: !!doctorId,
+  });
+}
+
+export function useSuspenseGetAllDoctors(params: DoctorParams) {
   return useSuspenseQuery({
     queryKey: ["doctors", params],
     queryFn: () => getAllDoctors(params),
   });
-};
+}
 
-export const useApproveDoctor = () => {
+export function useApproveDoctor() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: approveDoctor,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
     },
   });
-};
+}
+
+export function useGetTodayScheduleByDoctor(params: {
+  doctorId?: string;
+  page?: number;
+  limit?: number;
+}) {
+  return useQuery({
+    queryKey: ["schedule", params],
+    queryFn: () => getTodayScheduleByDoctor(params),
+  });
+}
