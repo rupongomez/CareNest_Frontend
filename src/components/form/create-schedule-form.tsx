@@ -1,4 +1,3 @@
-import React from "react";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { useForm } from "@tanstack/react-form";
 import { Input } from "../ui/input";
@@ -6,25 +5,58 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
+import { scheduleValidationSchema } from "@/validation/schedule.validation";
+import { useCreateSchedule } from "@/hooks/schedule.hook";
+import { toast } from "../ui/toast";
+import { Spinner } from "../ui/spinner";
 
-export default function CreateScheduleForm() {
+export default function CreateScheduleForm({
+  setOpen,
+}: {
+  setOpen: (open: boolean) => void;
+}) {
+  const { mutate: createSchedule, isPending } = useCreateSchedule();
   const form = useForm({
     defaultValues: {
       date: "",
       startTime: "",
       endTime: "",
-      meetingLink: "",
+      meetingLink: "https://meet.google.com/wit-nkcw-sqz",
+    },
+    validators: {
+      onSubmit: scheduleValidationSchema,
     },
 
     onSubmit: ({ value }) => {
-      //   console.log(value);
       const scheduleValue = {
-        startDateTime: `${value.date}T${value.startTime}:00.000Z`,
-        endDateTime: `${value.date}T${value.endTime}:00.000Z`,
+        startDateTime: new Date(
+          `${value.date}T${value.startTime}`,
+        ).toISOString(),
+        endDateTime: new Date(`${value.date}T${value.endTime}`).toISOString(),
         meetingLink: value.meetingLink,
       };
 
-      console.log(scheduleValue);
+      createSchedule(scheduleValue, {
+        onSuccess: (res) => {
+          if (res.success) {
+            toast.add({
+              title: " Schedule Created",
+              description: "Your schedule has been created successfully.",
+              type: "success",
+            });
+          }
+          setOpen(false);
+        },
+        onError: (err) => {
+          toast.add({
+            title: "Schedule Creation Failed",
+            description:
+              err.message || "Please check your input and try again.",
+            type: "error",
+          });
+          setOpen(false);
+        },
+      });
     },
   });
   return (
@@ -42,7 +74,7 @@ export default function CreateScheduleForm() {
             const selected = field.state.value
               ? new Date(`${field.state.value}T00:00:00`)
               : undefined;
-            console.log(selected);
+
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Date</FieldLabel>
@@ -86,6 +118,7 @@ export default function CreateScheduleForm() {
                     onBlur={field.handleBlur}
                     // className="appearance-none bg-background [&::-webkit-calendar-picker-indicator] [&::-webkit-calendar-picker-indicator]:appearance-none"
                   />
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
@@ -107,6 +140,7 @@ export default function CreateScheduleForm() {
                     onBlur={field.handleBlur}
                     // className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                   />
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
@@ -133,7 +167,16 @@ export default function CreateScheduleForm() {
           }}
         </form.Field>
 
-        <Button type="submit">Submit </Button>
+        <Button type="submit">
+          {isPending ? (
+            <>
+              <Spinner className="animate-spin" />
+              Submit...
+            </>
+          ) : (
+            "Submit"
+          )}{" "}
+        </Button>
       </FieldGroup>
     </form>
   );
