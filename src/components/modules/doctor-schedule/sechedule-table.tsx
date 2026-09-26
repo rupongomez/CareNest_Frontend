@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import TablePagination from "@/components/ui/table-pagination";
-import { useGetAllPublicDoctors } from "@/hooks";
 import type { DoctorParams } from "@/types";
 import { getMySchedules } from "@/api/schedule.api";
 import { useMySchedules } from "@/hooks/schedule.hook";

@@ -10,6 +10,7 @@ import React from "react";
 export default function Header() {
   const routes = [
     { name: "Home", url: "/" },
+    { name: "Doctors", url: "/doctors" },
     { name: "About", url: "/about-us" },
   ];
 

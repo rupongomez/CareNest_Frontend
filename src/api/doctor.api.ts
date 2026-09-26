@@ -55,3 +55,13 @@ export function getPublicDoctorProfile(doctorId: string) {
     `/doctor/public/${doctorId}`,
   );
 }
+
+export function getTodayScheduleByDoctor(params: {
+  doctorId: string;
+  page?: number;
+  limit?: number;
+}) {
+  return apiClient("/schedule/todays-schedule", {
+    params,
+  });
+}

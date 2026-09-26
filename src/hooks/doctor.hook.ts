@@ -84,3 +84,14 @@ export function useGetTodayScheduleByDoctor(params: {
     queryFn: () => getTodayScheduleByDoctor(params),
   });
 }
+
+// export const useGetTodaysScheduleByDoctor = (params: {
+//   doctorId: string;
+//   page?: number;
+//   limit?: number;
+// }) => {
+//   return useQuery({
+//     queryKey: ["schedule", params],
+//     queryFn: () => getTodayScheduleByDoctor(params),
+//   });
+// };
