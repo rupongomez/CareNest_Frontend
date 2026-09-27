@@ -57,10 +57,15 @@ export default function DoctorBooking({ doctorId }: { doctorId: string }) {
           // router.push("/appointments");
         },
         onError: (err) => {
+          const apiError = err as Error & {
+            data?: {
+              message?: string;
+            };
+          };
           toast.add({
             title: "Booking Failed",
             description:
-              err?.data?.message ||
+              apiError?.data?.message ||
               "Please check your credentials and try again.",
             type: "error",
           });

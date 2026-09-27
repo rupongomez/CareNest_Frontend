@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import { ApiResponse } from "@/types";
+import { ApiResponse, PublicDoctorProfile } from "@/types";
 import {
   BookAppointmentPayload,
   BookAppointmentResponse,
@@ -19,7 +19,9 @@ export const getMyAppointments = (params: {
   page?: number;
   limit?: number;
 }) => {
-  return apiClient("/appointment/my-appointments", {
+  return apiClient<
+    ApiResponse<{ doctor: PublicDoctorProfile; status: string; id: string }[]>
+  >("/appointment/my-appointments", {
     params,
   });
 };
