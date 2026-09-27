@@ -1,26 +1,171 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { useGetMe, useGetTodayScheduleByDoctor } from "@/hooks";
+import { useBookAppointment } from "@/hooks/appointment.hook";
+import { Schedule } from "@/types/schedule.type";
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import React from "react";
+import { useState } from "react";
+
+interface BookingConfirmation {
+  schedule: Schedule;
+  paymentUrl: string;
+}
 
 export default function DoctorBooking({ doctorId }: { doctorId: string }) {
+  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(
+    null,
+  );
   const router = useRouter();
   const { data: me, isPending: mePending } = useGetMe();
-  const { data, isPending } = useGetTodayScheduleByDoctor({
+  const { data, isPending, error } = useGetTodayScheduleByDoctor({
     doctorId: doctorId,
   });
+  const { mutate: book, isPending: bookingPending } = useBookAppointment();
 
-  console.log(data);
-  const handleBooking = () => {
+  const schedules = data?.data ?? [];
+
+  const handleBooking = (schedule: Schedule) => {
     if (!mePending && !me?.data) {
       router.push("/login");
       return;
     }
+
+    book(
+      { scheduleId: schedule.id },
+      {
+        onSuccess: (res) => {
+          toast.add({
+            title: "Booking Successful",
+            description:
+              res?.message ||
+              "Your appointment has been booked successfully. You must pay for the appointment to confirm it.",
+            type: "success",
+          });
+          setConfirmation({ paymentUrl: res.data.paymentUrl, schedule });
+          // router.push("/appointments");
+        },
+        onError: (err) => {
+          toast.add({
+            title: "Booking Failed",
+            description:
+              err?.data?.message ||
+              "Please check your credentials and try again.",
+            type: "error",
+          });
+        },
+      },
+    );
   };
+
+  if (isPending) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">
+            Loading today&apos;s slots…
+          </span>
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="py-10 text-center text-muted-foreground">
+        Could not load slots. Please try again.
+      </p>
+    );
+  }
+
+  if (schedules.length === 0) {
+    return (
+      <p className="py-10 text-center text-muted-foreground">
+        No bookable slots today for this doctor. Try another day or doctor.
+      </p>
+    );
+  }
+
   return (
-    <div>
-      <Button onClick={() => handleBooking()}>Book Now</Button>
-    </div>
+    <>
+      <div>
+        {schedules.map((schedule) => (
+          <div
+            key={schedule.id}
+            className="border rounded-md p-3 flex gap-5 items-center"
+          >
+            <span>{format(schedule.startDateTime, "eeee")}</span>
+            <span>{format(schedule.startDateTime, "PP")}</span>
+            <span className="text-sm text-muted-foreground">
+              Starts at {format(schedule.startDateTime, "p")}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              Starts at {format(schedule.endDateTime, "p")}
+            </span>
+            <Button className="ml-auto" onClick={() => handleBooking(schedule)}>
+              {bookingPending ? (
+                <>
+                  <Spinner /> Booking...
+                </>
+              ) : (
+                "Book Now"
+              )}
+            </Button>
+          </div>
+        ))}
+      </div>
+      <Dialog
+        open={!!confirmation}
+        onOpenChange={() => {
+          if (!open) {
+            setConfirmation(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Booking Successful</DialogTitle>
+            <DialogDescription>
+              Please pay within 10 minutes to confirm your booking.
+            </DialogDescription>
+            <span>
+              Date and time:{" "}
+              {confirmation
+                ? format(confirmation?.schedule.startDateTime as string, "PPP")
+                : "N/A"}
+            </span>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmation(null)}>
+              Pay Later
+            </Button>
+            <Button
+              onClick={() => {
+                if (confirmation) {
+                  window.location.href = confirmation?.paymentUrl;
+                }
+              }}
+            >
+              Pay Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
+
+// payment failed= http://localhost:3000/dashboard/my-appointments?status=failure

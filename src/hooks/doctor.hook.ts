@@ -4,9 +4,9 @@ import {
   getAllDoctors,
   getAllPublicDoctors,
   getPublicDoctorProfile,
+  getTodayScheduleByDoctor,
   verifyDoctorAccount,
 } from "@/api";
-import { getTodayScheduleByDoctor } from "@/api/schedule.api";
 import { DoctorParams, PublicDoctorParams } from "@/types";
 import {
   useMutation,
@@ -75,7 +75,7 @@ export function useApproveDoctor() {
 }
 
 export function useGetTodayScheduleByDoctor(params: {
-  doctorId?: string;
+  doctorId: string;
   page?: number;
   limit?: number;
 }) {

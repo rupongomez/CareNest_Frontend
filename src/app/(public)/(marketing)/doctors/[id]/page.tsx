@@ -17,7 +17,6 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 export async function generateStaticParams() {
   const limit = 1;

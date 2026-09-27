@@ -14,3 +14,12 @@ export const bookAppointment = (payload: BookAppointmentPayload) => {
     },
   );
 };
+
+export const getMyAppointments = (params: {
+  page?: number;
+  limit?: number;
+}) => {
+  return apiClient("/appointment/my-appointments", {
+    params,
+  });
+};

@@ -7,6 +7,7 @@ import {
   DoctorParams,
   PublicDoctorProfile,
 } from "@/types/doctor.type";
+import { Schedule } from "@/types/schedule.type";
 
 export const applyAsDoctor = (payload: DoctorApplicationPayload) => {
   const formData = new FormData();
@@ -61,7 +62,7 @@ export function getTodayScheduleByDoctor(params: {
   page?: number;
   limit?: number;
 }) {
-  return apiClient("/schedule/todays-schedule", {
+  return apiClient<ApiResponse<Schedule[]>>("/schedule/todays-schedule", {
     params,
   });
 }

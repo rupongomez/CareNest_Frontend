@@ -31,13 +31,3 @@ export function deleteSchedule(scheduleId: string) {
     method: "DELETE",
   });
 }
-
-export function getTodayScheduleByDoctor(params: {
-  doctorId?: string;
-  page?: number;
-  limit?: number;
-}) {
-  return apiClient("/schedule/todays-schedule", {
-    params,
-  });
-}
