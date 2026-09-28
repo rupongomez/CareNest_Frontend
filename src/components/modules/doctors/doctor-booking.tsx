@@ -50,7 +50,7 @@ export default function DoctorBooking({ doctorId }: { doctorId: string }) {
             title: "Booking Successful",
             description:
               res?.message ||
-              "Your appointment has been booked successfully. You must pay for the appointment to confirm it.",
+              "Your appointment has been booked successfully. You must pay first to confirm your booking. Please pay within 10 minutes.",
             type: "success",
           });
           setConfirmation({ paymentUrl: res.data.paymentUrl, schedule });
